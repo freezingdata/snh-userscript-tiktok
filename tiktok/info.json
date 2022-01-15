@@ -1,0 +1,9 @@
+{
+    "module": "TikTok Postings",
+    "unique_id": "TIKTOK_SCRIPT",
+    "owner": "Benno Krause",
+    "testing_expert": "",
+    "copyright": "Freezingdata GmbH",
+    "version": "3.0.1",
+    "entrypoint": "TikTok.py"
+}

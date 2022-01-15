@@ -1,0 +1,39 @@
+https://www.tiktok.com/api/user/detail
+
+    {
+        "statusCode": 0,
+        "userInfo": {
+            "user": {
+                "id": "6785296725822866438",
+                "uniqueId": "catcats74",
+                "nickname": "Cats 🐱",
+                "avatarThumb": "https://p16-sign-sg.tiktokcdn.com/aweme/100x100/tos-alisg-avt-0068/b18dae2a3a38fabbd24bbbf32d2a2ee8.jpeg?x-expires=1641592800&x-signature=CGlt1EU8njRVYnZblVj5SsO07Fo%3D",
+                "avatarMedium": "https://p16-sign-sg.tiktokcdn.com/aweme/720x720/tos-alisg-avt-0068/b18dae2a3a38fabbd24bbbf32d2a2ee8.jpeg?x-expires=1641592800&x-signature=fLYR2PGijTy3ZZohhfXJST4adl4%3D",
+                "avatarLarger": "https://p16-sign-sg.tiktokcdn.com/aweme/1080x1080/tos-alisg-avt-0068/b18dae2a3a38fabbd24bbbf32d2a2ee8.jpeg?x-expires=1641592800&x-signature=mrqEK1ognieHOzXD6LPlMunQM8o%3D",
+                "signature": "Hi",
+                "verified": false,
+                "secUid": "MS4wLjABAAAACJ8YL9sbWhQiNLT9ox3uZVBlD9pflygbVnR23C6sq99wWKZNIYnmxm1t8ErJDfi7",
+                "secret": false,
+                "ftc": false,
+                "relation": 1,
+                "openFavorite": false,
+                "commentSetting": 0,
+                "duetSetting": 0,
+                "stitchSetting": 0,
+                "privateAccount": false,
+                "isADVirtual": false
+            },
+            "stats": {
+            "followingCount": 38,
+            "followerCount": 142,
+            "heartCount": 582,
+            "videoCount": 22,
+            "diggCount": 0,
+            "heart": 582
+            }
+        },
+        "shareMeta": {
+            "title": "Cats 🐱 bei TikTok",
+            "desc": "@catcats74 142 Follower, 39 Folgen, 582 Likes – Schau dir tolle Kurzvideos von Cats 🐱 an"
+        }
+    }    
