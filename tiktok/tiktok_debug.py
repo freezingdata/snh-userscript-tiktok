@@ -18,6 +18,11 @@ debugConfig = {
     "debugLevelThreshold"         : 0  
 }
 
+def initDebug(task_item):
+    global debugConfig
+    if "Debug" in task_item:
+        debugConfig = task_item["Debug"]
+
 
 def debugPrint(*text):
     if debugConfig["enableDebugLog"] is True:

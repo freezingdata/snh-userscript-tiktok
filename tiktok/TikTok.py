@@ -25,7 +25,7 @@ def getPluginInfo():
             'friends': False,
             'timeline': True,
             'timelinereactions': False, 
-            'timelinecomments': False,
+            'timelinecomments': True,
             'media': False, 
             'mediareactions': False,
             'mediacomments': False
@@ -47,11 +47,11 @@ def snh_GetUrl(profile, urlType):
     return result
 
 def snh_Save(taskItem):
+    initDebug(taskItem)
     debugPrint('[START] snh_Save ' + taskItem["TargetType"])
     if taskItem["TargetType"] == "Profile":
         TiktokProfileCollector().save_profile(taskItem["TargetURL"])
     elif taskItem["TargetType"] == "Timeline":
-        taskItem["Config"]["quick"] = False
         TiktokTimelineCollector(taskItem["Targetprofile"], taskItem["Config"]).run()
         pass
     elif taskItem["TargetType"] == "ProfileDetails":
@@ -87,13 +87,6 @@ def CurrentWebPageIsPage():
 def CurrentWebPageIsGroup():
     # Not used
     return TiktokProfileCollector().current_is_group()
-
-def GetScreenshotSizes():
-    values = {}
-    values['areaPositionX'] = 0
-    values['areaPositionY'] = 0
-    values['areaSizeX'] = 830
-    return values    
 
 def DisableUseraccountData():
     pass

@@ -14,6 +14,8 @@ from tiktok.tiktok_tools import getRegex, checkJson
 from tiktok.tiktok_debug import *
 from tiktok.tiktok_urls import *
 from tiktok.tiktok_posting_html_creator import TiktokHTMLFactory
+from tiktok.tiktok_timeline_comment_collector import TiktokCommentCollector
+from tiktok.tiktok_config import modul_config
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
 import json
@@ -49,10 +51,10 @@ class TiktokTimelineCollector:
         
         
         self.handle_preloaded_postings(page_json)        
-        self.capture_postings()
+        #self.capture_postings() # TODO:
 
         # Capture the complete post as html, if self.config["quick"] is False
-        if self.config["quick"] is False:
+        if modul_config["simple_timeline_collection"] is False:
             self.enhanced_capturing()
 
         debugPrint('[Timeline] Finish saving timeline')
@@ -69,14 +71,21 @@ class TiktokTimelineCollector:
         for idx in range(count_visible_posting):
             if idx < len(self.posting_list):
                 snhwalker.StepProgress()
+                
                 debugPrint(f'[Timeline] Open posts {idx+1}/{count_visible_posting}')  
+
+                if self.config['SaveComments'] == True:
+                    snhwalker.StartResourceCapture('https://www.tiktok.com/api/comment/list/','');
                 snhwalker_utils.snh_browser.ExecuteJavascript(f'document.querySelectorAll("{css_selector_post}")[{idx}].click();')   
                 snhwalker_utils.snh_browser.WaitMS(2000)            
                 self.posting_list[idx]['Sourcecode'] = snhwalker_utils.snh_browser.GetJavascriptString(f'document.querySelector("{css_selector_viewer}").outerHTML')
                 self.posting_list[idx]['Stylesheet'] = snhwalker_utils.snh_browser.GetPageCSS() 
 
-                self.send_to_snh(self.posting_list[idx])      
+                self.send_to_snh(self.posting_list[idx])     
 
+                if self.config['SaveComments'] == True:
+                    TiktokCommentCollector(self.target_profile, self.posting_list[idx]).run()
+              
 
     def get_current_pagejson(self):
         HTML = snhwalker_utils.snh_browser.GetHTMLSource()
@@ -130,7 +139,7 @@ class TiktokTimelineCollector:
         debugPrint(f'[Timeline] Extracting post {self.posting_count}')
         snh_posting = self.ConvertToSNPostingdata(tt_postingitem)
         
-        if self.config["quick"] is True:
+        if modul_config["simple_timeline_collection"] is True:
             self.send_to_snh(snh_posting)
         else:
             self.posting_list.append(snh_posting)
