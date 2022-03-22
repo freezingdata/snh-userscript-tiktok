@@ -14,7 +14,6 @@ from tiktok.tiktok_tools import getRegex, checkJson
 from tiktok.tiktok_debug import *
 from tiktok.tiktok_urls import *
 from tiktok.tiktok_posting_html_creator import TiktokHTMLFactory
-from tiktok.tiktok_timeline_comment_collector import TiktokCommentCollector
 from tiktok.tiktok_timeline_comment_collector_api import TiktokCommentCollectorApi
 from tiktok.tiktok_config import modul_config
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
