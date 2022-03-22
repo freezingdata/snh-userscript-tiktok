@@ -114,6 +114,7 @@ class TiktokCommentCollector:
 
                 if snh_comment is None:
                     continue
+
                 if (modul_config["limit_root_comments"] is True) and (modul_config["limit_root_comment_count"] < len(self.comment_list)):
                     break
 
@@ -174,6 +175,7 @@ class TiktokCommentCollector:
         self.converting_comment_api_responses(False)
 
         # load all answers to comments by clicking at the "load more" buttons
+        self.counter = 0
         if modul_config["load_comment_answers"] is True:
             self.collect_comment_anwers()
 

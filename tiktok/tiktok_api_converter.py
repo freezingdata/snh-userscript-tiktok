@@ -39,7 +39,16 @@ class TiktokAPIConverter:
         def isCommentlist(self):
             return "comments" in self.dataobject    
 
+        def getPagination(self):
+            return {
+                "more_pages_to_load": self.dataobject["has_more"] == 1,
+                "cursor": self.dataobject["cursor"],
+                "total": self.dataobject["total"],
+            }
+
         def asTiktok_comment_list(self):
+            if self.dataobject["comments"] is None:
+                return []
             return self.dataobject["comments"]
 
         def asSNHUserdata(self):
@@ -82,4 +91,18 @@ class TiktokAPIConverter:
                 return tempComment    
             else:
                 return None    
-             
+
+        def getCommentsAnswers(self):
+            if  not "reply_comment" in self.dataobject:
+                return []
+            
+            if self.dataobject["reply_comment"] is None:
+                return []
+
+            return self.dataobject["reply_comment"]
+
+        def getCommentAnswerCount(self):
+            if  not "reply_comment_total" in self.dataobject:
+                return 0
+                
+            return self.dataobject["reply_comment_total"]

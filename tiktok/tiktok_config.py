@@ -19,7 +19,6 @@ modul_config = {
     # To collect comments, or save the original posting screenshot, it has set to False
     "simple_timeline_collection": False,
 
-
     # limit_root_comments
     # Type: boolean
     # True if the count of collected 1st level comments should be resticted
@@ -28,17 +27,22 @@ modul_config = {
     # limit_root_comment_count
     # Type: integer
     # Max count of 1st level comments, which can be collected,
-    "limit_root_comment_count": 500,
+    "limit_root_comment_count": 400,
 
     # load_comment_answers
     # Type: boolean
     # Indicates whether comment answers should be collected or not
     "load_comment_answers": True,
 
+    # limit_comment_answers
+    # Type: boolean
+    # If is is set True, answers are just collected, if it's root comment is inside the limit_comment_answers_count limit
+    "limit_comment_answers": True,    
+
     # limit_comment_answers_count
     # Type: integer
     # Max count of 1st level comments, which are considered for checking of answers
-    "limit_comment_answers_count": 300
+    "limit_comment_answers_count": 100
 
 
 }

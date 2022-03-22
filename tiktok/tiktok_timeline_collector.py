@@ -15,6 +15,7 @@ from tiktok.tiktok_debug import *
 from tiktok.tiktok_urls import *
 from tiktok.tiktok_posting_html_creator import TiktokHTMLFactory
 from tiktok.tiktok_timeline_comment_collector import TiktokCommentCollector
+from tiktok.tiktok_timeline_comment_collector_api import TiktokCommentCollectorApi
 from tiktok.tiktok_config import modul_config
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
@@ -51,13 +52,14 @@ class TiktokTimelineCollector:
         
         
         self.handle_preloaded_postings(page_json)        
-        #self.capture_postings() # TODO:
+        self.capture_postings() # TODO: Limit posting by config
 
         # Capture the complete post as html, if self.config["quick"] is False
         if modul_config["simple_timeline_collection"] is False:
             self.enhanced_capturing()
 
         debugPrint('[Timeline] Finish saving timeline')
+
 
 
     def enhanced_capturing(self):
@@ -84,8 +86,9 @@ class TiktokTimelineCollector:
                 self.send_to_snh(self.posting_list[idx])     
 
                 if self.config['SaveComments'] == True:
-                    TiktokCommentCollector(self.target_profile, self.posting_list[idx]).run()
-              
+                    #TiktokCommentCollector(self.target_profile, self.posting_list[idx]).run()
+
+                    TiktokCommentCollectorApi(self.target_profile, self.posting_list[idx]).run()
 
     def get_current_pagejson(self):
         HTML = snhwalker_utils.snh_browser.GetHTMLSource()
@@ -171,7 +174,7 @@ class TiktokTimelineCollector:
         resultItem['VideoURL'] = TikTokItem['video']['playAddr']
         resultItem['PostingID'] = snhwalker.GetUniquePostingID(resultItem)
 
-        if self.config["quick"] is True:
+        if modul_config["simple_timeline_collection"]  is True:
             resultItem['Sourcecode'] = TiktokHTMLFactory().create_simple_posting(resultItem, TikTokItem)
             resultItem['Stylesheet'] = TiktokHTMLFactory().get_css_simple_posting()
         
