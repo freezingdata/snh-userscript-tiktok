@@ -42,7 +42,5 @@ modul_config = {
     # limit_comment_answers_count
     # Type: integer
     # Max count of 1st level comments, which are considered for checking of answers
-    "limit_comment_answers_count": 100
-
-
+    "limit_comment_answers_count": 100,
 }

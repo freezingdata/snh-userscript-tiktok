@@ -21,21 +21,16 @@ from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
 
 class TiktokCommentCollectorApi:
-    def __init__(self, profile, posting):
+    def __init__(self, profile, posting, captured_api_query):
         self.target_profile = profile
         self.target_posting = posting   
         self.isInitialized = False
         self.counter = 0
-        requests = snhwalker_utils.snh_browser.FlushResourceCapture()
-        if len(requests) > 0:   
-            self.isInitialized = True
-            self.api = TikTokAPI(requests[0])    
+        self.api = TikTokAPI(captured_api_query)    
         pass
 
+
     def run(self):
-        if self.isInitialized  is False:
-            debugPrint(f'[Timeline Comments] No API calls captured, abord comment collection')    
-            return
         self.__get_comments()        
         
 

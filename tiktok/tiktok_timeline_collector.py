@@ -33,35 +33,37 @@ class TiktokTimelineCollector:
         }
         self.posting_list = []
         self.posting_count = 0
+        self.captured_api_querys = []
         pass
 
     def run(self):
         debugPrint('[Timeline] Start saving timeline')
         profile_url = GetURL_Profile(self.target_profile["UserID"])
 
-        # Ccapture the api call "item_list"
-        snhwalker_utils.snh_browser.StartResourceCapture('https://m.tiktok.com/api/item_list','');
+        # Capture the api call "item_list"
+        snhwalker_utils.snh_browser.StartResourceCapture('www.tiktok.com/api/user/detail','');
         snhwalker_utils.snh_browser.LoadPage(profile_url)
         snhwalker_utils.snh_browser.WaitMS(2000)
+        self.captured_api_querys = snhwalker_utils.snh_browser.CloseResourceCapture() # Needed for the potentiell cpmment querys
+        debugPrint(f'[Timeline] {len(self.captured_api_querys)} API querys captured') 
 
         debugPrint(f'[Timeline] Get preloaded posting objects')
-        page_json = self.get_current_pagejson()
+        page_json = self.__get_current_pagejson()
         debugWrite("Tiktok_(" + str(time.time()) + ")_preloaded_json_data.json", page_json) 
         debugPrint(f'[Timeline] Preloaded: {page_json[0:100]}')
         
         
-        self.handle_preloaded_postings(page_json)        
-        self.capture_postings() # TODO: Limit posting by config
+        self.__handle_preloaded_postings(page_json)        
+        self.__capture_postings() # TODO: Limit posting by config
 
         # Capture the complete post as html, if self.config["quick"] is False
         if modul_config["simple_timeline_collection"] is False:
-            self.enhanced_capturing()
+            self.__enhanced_capturing()
 
         debugPrint('[Timeline] Finish saving timeline')
 
 
-
-    def enhanced_capturing(self):
+    def __enhanced_capturing(self):
         css_selector_post= 'div[class*=DivPlayerContainer]'
         css_selector_viewer = 'div[class*=DivBrowserModeContainer]'
         count_visible_posting = snhwalker_utils.snh_browser.GetJavascriptInteger(f'document.querySelectorAll("{css_selector_post}").length')   
@@ -69,33 +71,30 @@ class TiktokTimelineCollector:
 
         snhwalker.InitProgress(count_visible_posting)
 
+        # Iterates through all visible postings and click on each of it
         for idx in range(count_visible_posting):
             if idx < len(self.posting_list):
-                snhwalker.StepProgress()
-                
+                snhwalker.StepProgress()                
                 debugPrint(f'[Timeline] Open posts {idx+1}/{count_visible_posting}')  
 
-                if self.config['SaveComments'] == True:
-                    snhwalker.StartResourceCapture('https://www.tiktok.com/api/comment/list/','');
                 snhwalker_utils.snh_browser.ExecuteJavascript(f'document.querySelectorAll("{css_selector_post}")[{idx}].click();')   
                 snhwalker_utils.snh_browser.WaitMS(2000)            
                 self.posting_list[idx]['Sourcecode'] = snhwalker_utils.snh_browser.GetJavascriptString(f'document.querySelector("{css_selector_viewer}").outerHTML')
                 self.posting_list[idx]['Stylesheet'] = snhwalker_utils.snh_browser.GetPageCSS() 
-
                 self.send_to_snh(self.posting_list[idx])     
 
-                if self.config['SaveComments'] == True:
-                    #TiktokCommentCollector(self.target_profile, self.posting_list[idx]).run()
+                # Start collection comments
+                if len(self.captured_api_querys) > 0:
+                    if self.config['SaveComments'] == True:
+                        TiktokCommentCollectorApi(self.target_profile, self.posting_list[idx], self.captured_api_querys[0]).run()
 
-                    TiktokCommentCollectorApi(self.target_profile, self.posting_list[idx]).run()
-
-    def get_current_pagejson(self):
+    def __get_current_pagejson(self):
         HTML = snhwalker_utils.snh_browser.GetHTMLSource()
         return getRegex(HTML, r"window\['SIGI_STATE'\]=(.*?);window", 1)
 
-
-    # Extracts postings out of the json object, extracted from the HTML source code. 
-    def handle_preloaded_postings(self, preloaded_json):
+    
+    def __handle_preloaded_postings(self, preloaded_json):
+        # Extracts postings out of the json object, extracted from the HTML source code. 
         if not checkJson(preloaded_json):
             return
         
@@ -107,13 +106,13 @@ class TiktokTimelineCollector:
         for key, tt_postingitem in page_data_object["ItemModule" ].items():
             self.ticktock_postingitem_handler(tt_postingitem)
 
-    # Extracts postings out of the automatically loaded AJAX responses (https://m.tiktok.com/api/post/item_list/)
-    def handle_captured_postings(self, captured_json):
+    
+    def __handle_captured_postings(self, captured_json):
+        # Extracts postings out of the automatically loaded AJAX responses (https://m.tiktok.com/api/post/item_list/)
         if not checkJson(captured_json):
             return
         
         data_object = json.loads(captured_json)
-
         if not "itemList" in data_object:
             return
 
@@ -121,19 +120,16 @@ class TiktokTimelineCollector:
             self.ticktock_postingitem_handler(tt_postingitem)
 
 
-    def capture_postings(self):
+    def __capture_postings(self):
         debugPrint('[Timeline] Scroll down complete timeline')
         snhwalker.DropStatusMessage('Scroll down complete timeline')
         snhwalker_utils.snh_browser.StartResourceCapture('https://m.tiktok.com/api/post/item_list/','')
-        snhwalker_utils.snh_browser.ScrollPage()
-        snhwalker_utils.snh_browser.StopResourceCapture()   
-        jsonRes = snhwalker_utils.snh_browser.GetCapturedResource()
-        jsonList = snhwalker_utils.snh_browser.FilterJsonObjects(jsonRes,'')   
+        snhwalker_utils.snh_browser.ScrollPage()        
+        api_querys = snhwalker_utils.snh_browser.CloseResourceCapture()   
         debugPrint('[Timeline] Begin extracting postings')
-        for json_string in  jsonList:
-            debugPrint(f'[Timeline] Data: {json_string[0:200]}')
-            debugWrite("Tiktok_(" + str(time.time()) + ")_posting_json_data.json", json_string)         
-            self.handle_captured_postings(json_string)     
+        for captured_request_item in  api_querys:
+            debugWrite("Tiktok_(" + str(time.time()) + ")_posting_json_data.json", captured_request_item["response_body"])         
+            self.__handle_captured_postings(captured_request_item["response_body"])     
 
 
     def ticktock_postingitem_handler(self, tt_postingitem):
@@ -145,12 +141,10 @@ class TiktokTimelineCollector:
             self.send_to_snh(snh_posting)
         else:
             self.posting_list.append(snh_posting)
-
        
     
     def send_to_snh(self, snh_posting):
         DTRangeStatus = snhwalker_utils.snh_model_manager.PostingDTStatus(snh_posting, self.config)
-
         if DTRangeStatus == 0:
             debugPrint(f'[Timeline]  - Post: create posting data {datetime.datetime.utcfromtimestamp(int(snh_posting["Timestamp"])).isoformat()}') 
             snhwalker.DropStatusMessage('Download images and videos in post: ' + datetime.datetime.utcfromtimestamp(int(snh_posting["Timestamp"])).isoformat())

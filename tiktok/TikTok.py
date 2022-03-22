@@ -4,12 +4,9 @@ import snhwalker_utils
 
 from tiktok.tiktok_debug import *
 from tiktok.tiktok_urls import *
+from tiktok.tiktok_config import modul_config
 from tiktok.tiktok_profile_collector import TiktokProfileCollector
 from tiktok.tiktok_timeline_collector import TiktokTimelineCollector
-
-
-# TODO: change print commands to debugging commands
-
 
 def getPluginInfo():
     return {
