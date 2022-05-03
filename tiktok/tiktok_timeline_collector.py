@@ -89,8 +89,7 @@ class TiktokTimelineCollector:
                         TiktokCommentCollectorApi(self.target_profile, self.posting_list[idx], self.captured_api_querys[0]).run()
 
     def __get_current_pagejson(self):
-        HTML = snhwalker_utils.snh_browser.GetHTMLSource()
-        return getRegex(HTML, r"window\['SIGI_STATE'\]=(.*?);window", 1)
+        return snhwalker_utils.snh_browser.GetJavascriptString("JSON.stringify(window['SIGI_STATE'])")
 
     
     def __handle_preloaded_postings(self, preloaded_json):

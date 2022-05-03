@@ -59,7 +59,6 @@ class TiktokProfileCollector:
         # loads a tiktok profile and submits the snh user ojects to snh
         snhwalker.StartResourceCapture('https://www.tiktok.com/api/user/detail','');
         snhwalker.LoadPage(profile_url)
-        snhwalker_utils.snh_browser.snh_browser
         snhwalker.StopResourceCapture()
         captured_data = snhwalker_utils.snh_browser.GetCapturedResource()
         debugPrint(f'Profile Json: {captured_data}')
