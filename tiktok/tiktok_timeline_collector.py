@@ -122,7 +122,7 @@ class TiktokTimelineCollector:
     def __capture_postings(self):
         debugPrint('[Timeline] Scroll down complete timeline')
         snhwalker.DropStatusMessage('Scroll down complete timeline')
-        snhwalker_utils.snh_browser.StartResourceCapture('https://m.tiktok.com/api/post/item_list/','')
+        snhwalker_utils.snh_browser.StartResourceCapture('https://www.tiktok.com/api/post/item_list/','')
         snhwalker_utils.snh_browser.ScrollPage()        
         api_querys = snhwalker_utils.snh_browser.CloseResourceCapture()   
         debugPrint('[Timeline] Begin extracting postings')
