@@ -41,7 +41,8 @@ class TiktokTimelineCollector:
         profile_url = GetURL_Profile(self.target_profile["UserID"])
 
         # Capture the api call "item_list"
-        snhwalker_utils.snh_browser.StartResourceCapture('www.tiktok.com/api/user/detail','');
+        debugPrint('[Timeline] Capture: www.tiktok.com/api/user/detail')
+        snhwalker_utils.snh_browser.StartResourceCapture('www.tiktok.com/api/user/detail','')
         snhwalker_utils.snh_browser.LoadPage(profile_url)
         snhwalker_utils.snh_browser.WaitMS(2000)
         self.captured_api_querys = snhwalker_utils.snh_browser.CloseResourceCapture() # Needed for the potentiell cpmment querys
@@ -122,11 +123,16 @@ class TiktokTimelineCollector:
     def __capture_postings(self):
         debugPrint('[Timeline] Scroll down complete timeline')
         snhwalker.DropStatusMessage('Scroll down complete timeline')
+        debugPrint('[Timeline] Capture: https://www.tiktok.com/api/post/item_list/')
         snhwalker_utils.snh_browser.StartResourceCapture('https://www.tiktok.com/api/post/item_list/','')
         snhwalker_utils.snh_browser.ScrollPage()        
-        api_querys = snhwalker_utils.snh_browser.CloseResourceCapture()   
+        api_querys = snhwalker_utils.snh_browser.CloseResourceCapture()  
+        debugPrint(f'[Timeline] {len(api_querys)} API querys captured')  
         debugPrint('[Timeline] Begin extracting postings')
+        count = 1
         for captured_request_item in  api_querys:
+            debugPrint(f'[Timeline] Handle API Query ({count}/{len(api_querys)})')  
+            count += 1
             debugWrite("Tiktok_(" + str(time.time()) + ")_posting_json_data.json", captured_request_item["response_body"])         
             self.__handle_captured_postings(captured_request_item["response_body"])     
 

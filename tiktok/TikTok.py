@@ -10,6 +10,7 @@ from tiktok.tiktok_timeline_collector import TiktokTimelineCollector
 
 def getPluginInfo():
     return {
+        'version': '3.0.3',
         'name': 'TikTok',
         'url': 'https://www.tiktok.com/',
         'copyright': 'Freezingdata GmbH',
@@ -45,6 +46,7 @@ def snh_GetUrl(profile, urlType):
 
 def snh_Save(taskItem):
     initDebug(taskItem)
+    debugPrint(getPluginInfo())
     debugPrint('[START] snh_Save ' + taskItem["TargetType"])
     if taskItem["TargetType"] == "Profile":
         TiktokProfileCollector().save_profile(taskItem["TargetURL"])
