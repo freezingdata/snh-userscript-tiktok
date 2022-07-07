@@ -125,7 +125,7 @@ class TiktokTimelineCollector:
         debugPrint('[Timeline] Scroll down complete timeline')
         snhwalker.DropStatusMessage('Scroll down complete timeline')
         debugPrint('[Timeline] Capture: https://www.tiktok.com/api/')
-        snhwalker_utils.snh_browser.StartResourceCapture('https://www.tiktok.com/api/','')
+        snhwalker_utils.snh_browser.StartResourceCapture('api','')
         snhwalker_utils.snh_browser.ScrollPage()        
         api_querys = snhwalker_utils.snh_browser.CloseResourceCapture()  
         debugPrint(f'[Timeline] {len(api_querys)} API querys captured')  
