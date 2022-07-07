@@ -116,15 +116,16 @@ class TiktokTimelineCollector:
         if not "itemList" in data_object:
             return
 
-        for tt_postingitem in data_object["itemList" ]:
-            self.ticktock_postingitem_handler(tt_postingitem)
+        if data_object.get("itemList"):
+            for tt_postingitem in data_object.get("itemList"):
+                self.ticktock_postingitem_handler(tt_postingitem)
 
 
     def __capture_postings(self):
         debugPrint('[Timeline] Scroll down complete timeline')
         snhwalker.DropStatusMessage('Scroll down complete timeline')
-        debugPrint('[Timeline] Capture: https://www.tiktok.com/api/post/item_list/')
-        snhwalker_utils.snh_browser.StartResourceCapture('https://www.tiktok.com/api/post/item_list/','')
+        debugPrint('[Timeline] Capture: https://www.tiktok.com/api/')
+        snhwalker_utils.snh_browser.StartResourceCapture('api','')
         snhwalker_utils.snh_browser.ScrollPage()        
         api_querys = snhwalker_utils.snh_browser.CloseResourceCapture()  
         debugPrint(f'[Timeline] {len(api_querys)} API querys captured')  
