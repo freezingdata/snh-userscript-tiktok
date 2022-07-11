@@ -8,7 +8,7 @@
 @License :   (C)Copyright 2020-2022, Freezingdata GmbH
 @Desc    :   None
 '''
-
+import uuid
 
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
@@ -94,4 +94,35 @@ class TikTokAPI:
             debugPrint("'[API] ERROR in get_request")
             exc_type, exc_obj, exc_tb = sys.exc_info()
             debugPrint(e, exc_type, exc_tb.tb_lineno)   
-            return ''    
+            return ''
+
+    @staticmethod
+    def do_simple_get_request(request_url):
+        debugPrint("[API TikTok] - get request.")
+
+        varname = f"xhr{str(uuid.uuid4().hex)[1:5]}"
+        snhwalker_utils.snh_browser.ExecuteJavascript(f"delete {varname}Result;")
+        snhwalker_utils.snh_browser.ExecuteJavascript(f"delete {varname};")
+        snhwalker_utils.snh_browser.WaitMS(200)
+
+        js = f"""var {varname} = new XMLHttpRequest();
+                     {varname}.open("GET", "{request_url}", true); 
+                     {varname}.withCredentials = true; 
+                     {varname}.onload = function () {{{varname}Result = this.responseText}};
+                     {varname}.send("");"""
+
+        debugPrint(js)
+        snhwalker_utils.snh_browser.ExecuteJavascript(js)
+        snhwalker_utils.snh_browser.WaitMS(1500)
+
+        result = snhwalker_utils.snh_browser.GetJavascriptString(f'{varname}Result;')
+        count = 0
+        while result == "" or count < 5:
+            snhwalker_utils.snh_browser.WaitMS(1500)
+            result = snhwalker_utils.snh_browser.GetJavascriptString(f'{varname}Result;')
+            count += 1
+
+        snhwalker_utils.snh_browser.ExecuteJavascript(f"let {varname}Result = '';")
+
+        debugWrite("Tiktok_(" + str(time.time()) + ")_GetRequest.data", result)
+        return result
