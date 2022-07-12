@@ -8,6 +8,10 @@
 @License :   (C)Copyright 2020-2021, Freezingdata GmbH
 @Desc    :   None
 '''
+from typing import Union
+
+import snhwalker_utils
+
 
 def GetURL_OwnProfile():
     return 'https://www.tiktok.com/'
@@ -28,12 +32,16 @@ def GetURL_ProfileDetails(UserID, UserIDNumber = ''):
 class TiktokUrlSolver:
     TIKTOK_URL = "https://www.tiktok.com/"
 
-    def __init__(self, url: str):
-        self.url: str = url
-        self.url_type = self.solve_url_type()
+    def __init__(self):
+        self.page_type = self.solve_url_type()
 
-    def solve_url_type(self) -> str:
-        spited_url = self.url.split("/")
+    @staticmethod
+    def get_current_url():
+        return snhwalker_utils.snh_browser.GetJavascriptString('window.location.href')
+
+    def solve_url_type(self) -> Union[str, None]:
+        url = self.get_current_url()
+        spited_url = url.split("/")
 
         if len(spited_url) == 4:
             if spited_url[4].startswith("@"):
@@ -43,4 +51,4 @@ class TiktokUrlSolver:
             if "video" in spited_url[5]:
                 return "Post"
 
-        return "bad_url_type"
+        return None
