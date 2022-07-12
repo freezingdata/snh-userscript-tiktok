@@ -23,3 +23,24 @@ def GetURL_Fotos(UserID, UserIDNumber = ''):
 
 def GetURL_ProfileDetails(UserID, UserIDNumber = ''):
     return 'https://www.tiktok.com/'
+
+
+class TiktokUrlSolver:
+    TIKTOK_URL = "https://www.tiktok.com/"
+
+    def __init__(self, url: str):
+        self.url: str = url
+        self.url_type = self.solve_url_type()
+
+    def solve_url_type(self) -> str:
+        spited_url = self.url.split("/")
+
+        if len(spited_url) == 4:
+            if spited_url[4].startswith("@"):
+                return "profile"
+
+        if len(spited_url) > 4:
+            if "video" in spited_url[5]:
+                return "post"
+
+        return "bad_url_type"
