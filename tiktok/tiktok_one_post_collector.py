@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+# -*-coding:utf-8 -*-
+'''
+@File    :   tiktok_one_post_collector.py
+@Time    :   2022/07/12 11:21:18
+@Author  :   Anton Sinaiskii
+@Contact :   as@freezingdata.de
+@License :   (C)Copyright 2020-2022, Freezingdata GmbH
+@Desc    :   None
+'''
+
 import json
 import sys
 
