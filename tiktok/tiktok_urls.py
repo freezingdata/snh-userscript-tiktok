@@ -37,10 +37,10 @@ class TiktokUrlSolver:
 
         if len(spited_url) == 4:
             if spited_url[4].startswith("@"):
-                return "profile"
+                return "User"
 
         if len(spited_url) > 4:
             if "video" in spited_url[5]:
-                return "post"
+                return "Post"
 
         return "bad_url_type"
