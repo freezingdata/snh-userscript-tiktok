@@ -3,6 +3,7 @@ import snhwalker_utils
 
 
 from tiktok.tiktok_debug import *
+from tiktok.tiktok_one_post_collector import TiktokOnePostCollector
 from tiktok.tiktok_urls import *
 from tiktok.tiktok_config import modul_config
 from tiktok.tiktok_profile_collector import TiktokProfileCollector
@@ -19,6 +20,7 @@ def getPluginInfo():
             'groups': False,
             'details': False,
             'stories': False,
+            'post': True,
             'videos': True,
             'friends': False,
             'timeline': True,
@@ -52,7 +54,8 @@ def snh_Save(taskItem):
         TiktokProfileCollector().save_profile(taskItem["TargetURL"])
     elif taskItem["TargetType"] == "Timeline":
         TiktokTimelineCollector(taskItem["Targetprofile"], taskItem["Config"]).run()
-        pass
+    elif taskItem["TargetType"] == "Post":
+        TiktokOnePostCollector(taskItem["TargetURL"], taskItem["Config"]).handle_post()
     elif taskItem["TargetType"] == "ProfileDetails":
         pass
     elif taskItem["TargetType"] == "Media":
@@ -60,8 +63,13 @@ def snh_Save(taskItem):
     elif taskItem["TargetType"] == "Friends":
         pass
 
+
 def HandleProfile():
     TiktokProfileCollector().handle_profile()
+
+
+def HandlePost():
+    TiktokOnePostCollector().handle_post()
 
 def GetProfileStatus():
     # Not used
@@ -93,3 +101,23 @@ def DisableUseraccountData():
 def EnableUseraccountData():
     pass  
 
+
+def manual_enable_debug_log():
+    global debugConfig
+    debugConfig["enableDebugLog"] = True
+
+
+def HandlePage() -> None:
+    manual_enable_debug_log()
+    current_page = TiktokUrlSolver()
+    if not current_page.page_type:
+        return
+
+    call_dict = {
+        "User": HandleProfile,
+        "Post": HandlePost,
+    }
+
+    for key in call_dict:
+        if key == current_page.page_type:
+            call_dict.get(key)()
