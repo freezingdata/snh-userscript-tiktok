@@ -44,11 +44,11 @@ class TiktokUrlSolver:
         spited_url = url.split("/")
 
         if len(spited_url) == 4:
-            if spited_url[4].startswith("@"):
+            if spited_url[3].startswith("@"):
                 return "User"
 
         if len(spited_url) > 4:
-            if "video" in spited_url[5]:
+            if "video" in spited_url[4]:
                 return "Post"
 
         return None
