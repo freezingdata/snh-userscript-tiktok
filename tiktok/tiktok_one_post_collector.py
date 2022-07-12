@@ -24,7 +24,7 @@ from tiktok_timeline_collector import TiktokTimelineCollector
 class TiktokOnePostCollector:
     def __init__(self, url=None, config=None):
         self.url = url
-        self.config = config
+        self.config = config if config else {}
 
     def handle_post(self) -> dict:
         current_url = snhwalker_utils.snh_browser.GetJavascriptString("""window.location.href""")
@@ -32,13 +32,13 @@ class TiktokOnePostCollector:
         print(f'[Timeline] Start handle one_post {current_url}')
 
         page_source: dict = self.get_page_source(current_url)
-        snh_post: dict = self.get_post_data(page_source, current_url)
+        snh_post: dict = self.get_post_data(page_source)
         snhwalker_utils.snhwalker.PromoteSNPostingdata(snh_post)
 
         debugPrint(f'[Timeline] End handle one_post {snh_post}')
         print(f'[Timeline] End handle one_post {snh_post}')
 
-        if self.config['SaveComments']:
+        if self.config.get('SaveComments'):
             debugPrint(f'[Timeline] Start save comments')
             print(f'[Timeline] Start save comments')
             TiktokCommentCollectorApi(snh_post.get("Userdata"), [snh_post], None).run()
@@ -48,7 +48,7 @@ class TiktokOnePostCollector:
     @staticmethod
     def get_page_source(current_url: str) -> dict:
         api_req = TikTokAPI().do_simple_get_request(current_url)
-        re_data: list = re.findall(r'(?P<result>{"AppContext.+}}})', api_req, re.DOTALL)
+        re_data: list = re.findall(r'(?P<result>{"AppContext.+}{3,})', api_req, re.DOTALL)
 
         try:
             page_source: dict = json.loads(re_data[0] + "}")
@@ -64,7 +64,7 @@ class TiktokOnePostCollector:
             debugPrint(e, exc_type, exc_tb.tb_lineno)
         return page_source
 
-    def get_post_data(self, page_source: dict, current_url: str) -> dict:
+    def get_post_data(self, page_source: dict) -> dict:
         video_key = page_source.get("ItemList").get("video").get("keyword")
         source_path = page_source.get("ItemModule").get(video_key)
 
