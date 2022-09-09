@@ -16,6 +16,7 @@ from tiktok.tiktok_api_converter import TiktokAPIConverter
 from tiktok.tiktok_api import TikTokAPI
 from tiktok.tiktok_config import modul_config
 import json
+import time
 
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
@@ -26,7 +27,8 @@ class TiktokCommentCollectorApi:
         self.target_posting = posting   
         self.isInitialized = False
         self.counter = 0
-        self.api = TikTokAPI(captured_api_query)    
+        self.api = TikTokAPI(captured_api_query)  
+        debugPrint(captured_api_query)  
         pass
 
 
@@ -42,7 +44,8 @@ class TiktokCommentCollectorApi:
                 "total": 0,
             }
         while pagination["more_pages_to_load"] is True:
-            jsonstring = self.api.get_comments(self.target_posting['PostingID_Network'], 20, pagination["cursor"])
+            jsonstring = self.api.get_comments(self.target_posting['PostingID_Network'], 20, pagination['cursor'])
+            debugWrite("Tiktok_(" + str(time.time()) + ")_comments.data", jsonstring)
             if checkJson(jsonstring) is False:
                 break
 

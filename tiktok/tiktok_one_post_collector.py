@@ -11,6 +11,7 @@
 
 import json
 import sys
+import time
 
 import snhwalker_utils
 from tiktok.tiktok_debug import *
@@ -41,17 +42,17 @@ class TiktokOnePostCollector:
         if self.config.get('SaveComments'):
             debugPrint(f'[Timeline] Start save comments')
             print(f'[Timeline] Start save comments')
-            TiktokCommentCollectorApi(snh_post.get("Userdata"), [snh_post], None).run()
+            TiktokCommentCollectorApi(snh_post.get("Userdata"), snh_post, None).run()
 
         return snh_post
 
     @staticmethod
     def get_page_source(current_url: str) -> dict:
         api_req = TikTokAPI().do_simple_get_request(current_url)
-        re_data: list = re.findall(r'(?P<result>{"AppContext.+}{3,})', api_req, re.DOTALL)
-
+        re_data: list = re.findall(r'({"AppContext.+?})\<\/script\>', api_req, re.DOTALL)
+        debugWrite("Tiktok_(" + str(time.time()) + ")_redata.data", re_data[0])
         try:
-            page_source: dict = json.loads(re_data[0] + "}")
+            page_source: dict = json.loads(re_data[0])
         except IndexError as e:
             page_source = {}
             debugPrint("[ERROR] Regex get nothing")
