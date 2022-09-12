@@ -25,6 +25,7 @@ class TikTokAPI:
     def __init__(self, api_request = None):
         if not api_request is None:
             self.useragent = snhwalker_utils.snh_browser.GetJavascriptString('navigator.userAgent')
+            print(api_request)
             self.cookies = getRegex(api_request["request_header_raw"], ";Cookie=(.*?);DNT", 1)
             self.universal_query = {
                 "aid": 1988,

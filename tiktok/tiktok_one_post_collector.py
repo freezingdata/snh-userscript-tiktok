@@ -14,6 +14,7 @@ import sys
 import time
 
 import snhwalker_utils
+from tiktok.tiktok_urls import TiktokUrlSolver
 from tiktok.tiktok_debug import *
 import re
 
@@ -28,26 +29,27 @@ class TiktokOnePostCollector:
         self.config = config if config else {}
 
     def handle_post(self) -> dict:
-        current_url = snhwalker_utils.snh_browser.GetJavascriptString("""window.location.href""")
-        debugPrint(f'[Timeline] Start handle one_post {current_url}')
-        print(f'[Timeline] Start handle one_post {current_url}')
+        if not self.url:
+            self.url = TiktokUrlSolver.get_current_url()
 
-        page_source: dict = self.get_page_source(current_url)
+        debugPrint(f'[Timeline] Start handle one_post {self.url}')
+        page_source: dict = self.get_page_source(self.url)
         snh_post: dict = self.get_post_data(page_source)
-        snhwalker_utils.snhwalker.PromoteSNPostingdata(snh_post)
+        if snh_post:
+            snhwalker_utils.snhwalker.PromoteSNPostingdata(snh_post)
+            debugPrint(f'[Timeline] End handle one_post {snh_post}')
 
-        debugPrint(f'[Timeline] End handle one_post {snh_post}')
-        print(f'[Timeline] End handle one_post {snh_post}')
+            if self.config.get('SaveComments'):
+                debugPrint(f'[Timeline] Start save comments')
+                current_user_url: str = TiktokUrlSolver.get_current_user_url(self.url)
+                captured_api_query: list = TiktokTimelineCollector.capture_api_queries(current_user_url)[0]
+                TiktokCommentCollectorApi(snh_post.get("Userdata"), snh_post, captured_api_query).run()
 
-        if self.config.get('SaveComments'):
-            debugPrint(f'[Timeline] Start save comments')
-            print(f'[Timeline] Start save comments')
-            TiktokCommentCollectorApi(snh_post.get("Userdata"), snh_post, None).run()
-
-        return snh_post
+            return snh_post
 
     @staticmethod
     def get_page_source(current_url: str) -> dict:
+        snhwalker_utils.snh_browser.LoadPage(current_url)
         api_req = TikTokAPI().do_simple_get_request(current_url)
         re_data: list = re.findall(r'({"AppContext.+?})\<\/script\>', api_req, re.DOTALL)
         debugWrite("Tiktok_(" + str(time.time()) + ")_redata.data", re_data[0])
@@ -66,18 +68,19 @@ class TiktokOnePostCollector:
         return page_source
 
     def get_post_data(self, page_source: dict) -> dict:
-        video_key = page_source.get("ItemList").get("video").get("keyword")
-        source_path = page_source.get("ItemModule").get(video_key)
-
-        snh_user = self.prepare_snh_user(source_path)
-        snh_posting = self.prepare_snh_post(source_path, snh_user)
-        snh_posting["Userdata"] = snh_user
-        return snh_posting
+        video_key = page_source.get("ItemList", {}).get("video", {}).get("keyword")
+        source_path = page_source.get("ItemModule", {}).get(video_key)
+        if source_path:
+            snh_user = self.prepare_snh_user(source_path)
+            snh_posting = self.prepare_snh_post(source_path, snh_user)
+            snh_posting["Userdata"] = snh_user
+            return snh_posting
+        else:
+            debugPrint("[ERROR] Source is empty")
 
     @staticmethod
     def prepare_snh_user(source: dict):
         debugPrint(f'[Timeline] Prepare snh user')
-        print(f'[Timeline] Prepare snh user')
 
         snh_user = snhwalker_utils.snh_model_manager.CreateDictSNUserData()
         user_data = {
@@ -90,16 +93,11 @@ class TiktokOnePostCollector:
         snh_user.update(user_data)
 
         debugPrint(f'[Timeline] Prepared snh user {user_data}')
-        print(f'[Timeline] Prepared snh user {user_data}')
         return snh_user
 
     @staticmethod
     def prepare_snh_post(source: dict, snh_profile) -> dict:
         debugPrint(f'[Timeline] Prepare snh post')
-        print(f'[Timeline] Prepare snh post')
-
         snh_posting = TiktokTimelineCollector(snh_profile, None).ConvertToSNPostingdata(source)
-
         debugPrint(f'[Timeline] Prepared snh post {snh_posting}')
-        print(f'[Timeline] Prepared snh post {snh_posting}')
         return snh_posting

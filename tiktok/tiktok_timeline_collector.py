@@ -33,27 +33,21 @@ class TiktokTimelineCollector:
         }
         self.posting_list = []
         self.posting_count = 0
-        self.captured_api_querys = []
+        self.captured_api_queries = []
         pass
 
     def run(self):
         debugPrint('[Timeline] Start saving timeline')
         profile_url = GetURL_Profile(self.target_profile["UserID"])
-
         # Capture the api call "item_list"
-        debugPrint('[Timeline] Capture: www.tiktok.com/api/user/detail')
-        snhwalker_utils.snh_browser.StartResourceCapture('www.tiktok.com/api/user/detail','')
-        snhwalker_utils.snh_browser.LoadPage(profile_url)
-        snhwalker_utils.snh_browser.WaitMS(2000)
-        self.captured_api_querys = snhwalker_utils.snh_browser.CloseResourceCapture() # Needed for the potentiell cpmment querys
-        debugPrint(f'[Timeline] {len(self.captured_api_querys)} API querys captured') 
+        self.captured_api_queries = self.capture_api_queries(profile_url)
+        debugPrint(f'[Timeline] {len(self.captured_api_queries)} API querys captured')
 
         debugPrint(f'[Timeline] Get preloaded posting objects')
         page_json = self.__get_current_pagejson()
         debugWrite("Tiktok_(" + str(time.time()) + ")_preloaded_json_data.json", page_json) 
         debugPrint(f'[Timeline] Preloaded: {page_json[0:100]}')
-        
-        
+
         self.__handle_preloaded_postings(page_json)        
         self.__capture_postings() # TODO: Limit posting by config
 
@@ -85,9 +79,9 @@ class TiktokTimelineCollector:
                 self.send_to_snh(self.posting_list[idx])     
 
                 # Start collection comments
-                if len(self.captured_api_querys) > 0:
+                if len(self.captured_api_queries) > 0:
                     if self.config['SaveComments'] == True:
-                        TiktokCommentCollectorApi(self.target_profile, self.posting_list[idx], self.captured_api_querys[0]).run()
+                        TiktokCommentCollectorApi(self.target_profile, self.posting_list[idx], self.captured_api_queries[0]).run()
 
     def __get_current_pagejson(self):
         return snhwalker_utils.snh_browser.GetJavascriptString("JSON.stringify(window['SIGI_STATE'])")
@@ -179,6 +173,14 @@ class TiktokTimelineCollector:
         
         return resultItem
 
+    @classmethod
+    def capture_api_queries(cls, url: str) -> list:
+        debugPrint('[Timeline] Capture: www.tiktok.com/api/user/detail')
+        snhwalker_utils.snh_browser.StartResourceCapture('www.tiktok.com/api/user/detail', '')
+        snhwalker_utils.snh_browser.LoadPage(url)
+        snhwalker_utils.snh_browser.WaitMS(2000)
+        # Needed for the potentiell comment queries
+        return snhwalker_utils.snh_browser.CloseResourceCapture()
 
 
 

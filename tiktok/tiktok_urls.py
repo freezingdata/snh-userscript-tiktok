@@ -35,8 +35,8 @@ class TiktokUrlSolver:
     def __init__(self):
         self.page_type = self.solve_url_type()
 
-    @staticmethod
-    def get_current_url():
+    @classmethod
+    def get_current_url(cls) -> str:
         return snhwalker_utils.snh_browser.GetJavascriptString('window.location.href')
 
     def solve_url_type(self) -> Union[str, None]:
@@ -52,3 +52,7 @@ class TiktokUrlSolver:
                 return "Post"
 
         return None
+
+    @classmethod
+    def get_current_user_url(cls, url: str) -> str:
+        return "/".join(url.split("/")[:4])
