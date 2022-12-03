@@ -20,6 +20,7 @@ import re
 
 from tiktok.tiktok_api import TikTokAPI
 from tiktok.tiktok_timeline_comment_collector_api import TiktokCommentCollectorApi
+from tiktok.tiktok_timeline_comment_collector_scraping import TiktokCommentCollectorScraping
 from tiktok_timeline_collector import TiktokTimelineCollector
 
 
@@ -42,8 +43,9 @@ class TiktokOnePostCollector:
             if self.config.get('SaveComments'):
                 debugPrint(f'[Timeline] Start save comments')
                 current_user_url: str = TiktokUrlSolver.get_current_user_url(self.url)
-                captured_api_query: list = TiktokTimelineCollector.capture_api_queries(current_user_url)[0]
-                TiktokCommentCollectorApi(snh_post.get("Userdata"), snh_post, captured_api_query).run()
+                # captured_api_query: list = TiktokTimelineCollector.capture_api_queries(current_user_url)[0]
+                #TiktokCommentCollectorApi(snh_post.get("Userdata"), snh_post, captured_api_query).run()
+                TiktokCommentCollectorScraping(snh_post.get("Userdata"), snh_post, 'non_overlay').run()
 
             return snh_post
 

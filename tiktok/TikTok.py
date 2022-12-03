@@ -1,5 +1,6 @@
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
+import sys
 
 
 from tiktok.tiktok_debug import *
@@ -8,6 +9,7 @@ from tiktok.tiktok_urls import *
 from tiktok.tiktok_config import modul_config
 from tiktok.tiktok_profile_collector import TiktokProfileCollector
 from tiktok.tiktok_timeline_collector import TiktokTimelineCollector
+from tiktok.tiktok_captcha_resolver import TiktokCaptchaResolver, TiktokCaptchaDetector
 
 def getPluginInfo():
     return {
@@ -121,3 +123,9 @@ def HandlePage() -> None:
     for key in call_dict:
         if key == current_page.page_type:
             call_dict.get(key)()
+
+
+def resolve_capture():
+    snhwalker_utils.snh_browser.WaitMS(1000)
+    TiktokCaptchaResolver(8).run()
+

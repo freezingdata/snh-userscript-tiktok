@@ -27,7 +27,7 @@ modul_config = {
     # limit_root_comment_count
     # Type: integer
     # Max count of 1st level comments, which can be collected,
-    "limit_root_comment_count": 400,
+    "limit_root_comment_count": 100,
 
     # load_comment_answers
     # Type: boolean
