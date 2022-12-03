@@ -22,6 +22,7 @@ from tiktok.tiktok_api import TikTokAPI
 from tiktok.tiktok_timeline_comment_collector_api import TiktokCommentCollectorApi
 from tiktok.tiktok_timeline_comment_collector_scraping import TiktokCommentCollectorScraping
 from tiktok_timeline_collector import TiktokTimelineCollector
+from tiktok.tiktok_captcha_resolver import TiktokCaptchaResolver
 
 
 class TiktokOnePostCollector:
@@ -29,17 +30,21 @@ class TiktokOnePostCollector:
         self.url = url
         self.config = config if config else {}
 
-    def handle_post(self) -> dict:
+    def save_post(self, ) -> dict:
         if not self.url:
             self.url = TiktokUrlSolver.get_current_url()
+        snhwalker_utils.snh_browser.LoadPage(self.url)
+        TiktokCaptchaResolver(4)
 
-        debugPrint(f'[Timeline] Start handle one_post {self.url}')
+        debugPrint(f'[Timeline] Start saving post {self.url}')
         page_source: dict = self.get_page_source(self.url)
         snh_post: dict = self.get_post_data(page_source)
+        TiktokCaptchaResolver(4)
         if snh_post:
+            snhwalker_utils.snhwalker.DownloadPostingFiles(snh_post, 'https://www.tiktok.com')
             snhwalker_utils.snhwalker.PromoteSNPostingdata(snh_post)
-            debugPrint(f'[Timeline] End handle one_post {snh_post}')
-
+            debugPrint(f'[Timeline] End saving post ')
+            TiktokCaptchaResolver(4)
             if self.config.get('SaveComments'):
                 debugPrint(f'[Timeline] Start save comments')
                 current_user_url: str = TiktokUrlSolver.get_current_user_url(self.url)
@@ -49,9 +54,23 @@ class TiktokOnePostCollector:
 
             return snh_post
 
+    # Handles the visible page as post and returns the basic posting data (without any media)
+    # This function is just for posting detection purposes of the SNH1
+    def handle_post(self, ) -> dict:
+        if not self.url:
+            self.url = TiktokUrlSolver.get_current_url()
+
+        debugPrint(f'[Timeline] Start handling visible post {self.url}')
+        page_source: dict = self.get_page_source(self.url)
+             
+        snh_post: dict = self.get_post_data(page_source)
+        if snh_post:
+            snhwalker_utils.snhwalker.PromoteSNPostingdata(snh_post)
+        
+    	    
     @staticmethod
     def get_page_source(current_url: str) -> dict:
-        snhwalker_utils.snh_browser.LoadPage(current_url)
+        #snhwalker_utils.snh_browser.LoadPage(current_url)
         api_req = TikTokAPI().do_simple_get_request(current_url)
         re_data: list = re.findall(r'({"AppContext.+?})\<\/script\>', api_req, re.DOTALL)
         debugWrite("Tiktok_(" + str(time.time()) + ")_redata.data", re_data[0])
@@ -100,6 +119,12 @@ class TiktokOnePostCollector:
     @staticmethod
     def prepare_snh_post(source: dict, snh_profile) -> dict:
         debugPrint(f'[Timeline] Prepare snh post')
+        css_selector_viewer = 'div[class*=DivContentContainer]'
         snh_posting = TiktokTimelineCollector(snh_profile, None).ConvertToSNPostingdata(source)
-        debugPrint(f'[Timeline] Prepared snh post {snh_posting}')
+        snh_posting['Sourcecode'] = snhwalker_utils.snh_browser.GetJavascriptString(f'document.querySelector("div[class*=DivPlayerContainer]").outerHTML') + \
+                                    snhwalker_utils.snh_browser.GetJavascriptString(f'document.querySelector("div[class*=DivAuthorContainer]").outerHTML') +\
+                                    snhwalker_utils.snh_browser.GetJavascriptString(f'document.querySelector("div[class*=PCommentTitle]").outerHTML')
+                
+        snh_posting['Stylesheet'] = snhwalker_utils.snh_browser.GetPageCSS()         
+        #debugPrint(f'[Timeline] Prepared snh post {snh_posting}')
         return snh_posting

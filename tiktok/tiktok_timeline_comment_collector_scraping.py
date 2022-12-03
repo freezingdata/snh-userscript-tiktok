@@ -81,9 +81,6 @@ class TiktokCommentCollectorScraping:
                 debugWrite("Tiktok_(" + str(time.time()) + ")_comments_answers.data", json.dumps(resource_capture_anwers))
                 self.__decode_answers(resource_capture_anwers, snh_comment_1lv_item)                   
     
-
-
-
     
     def __comments_1lv_nOverlay(self):
         # reload is necessary, becuase the first comments have allready been displayed without capturing

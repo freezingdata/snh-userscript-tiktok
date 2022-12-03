@@ -57,7 +57,7 @@ def snh_Save(taskItem):
     elif taskItem["TargetType"] == "Timeline":
         TiktokTimelineCollector(taskItem["Targetprofile"], taskItem["Config"]).run()
     elif taskItem["TargetType"] == "Post":
-        TiktokOnePostCollector(taskItem["TargetURL"], taskItem["Config"]).handle_post()
+        TiktokOnePostCollector(taskItem["TargetURL"], taskItem["Config"]).save_post()
     elif taskItem["TargetType"] == "ProfileDetails":
         pass
     elif taskItem["TargetType"] == "Media":
@@ -125,7 +125,7 @@ def HandlePage() -> None:
             call_dict.get(key)()
 
 
-def resolve_capture():
-    snhwalker_utils.snh_browser.WaitMS(1000)
-    TiktokCaptchaResolver(8).run()
+#def resolve_capture():
+#    snhwalker_utils.snh_browser.WaitMS(1000)
+#    TiktokCaptchaResolver(8)
 

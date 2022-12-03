@@ -114,16 +114,18 @@ class TikTokAPI:
 
         debugPrint(js)
         snhwalker_utils.snh_browser.ExecuteJavascript(js)
-        snhwalker_utils.snh_browser.WaitMS(1500)
+        snhwalker_utils.snh_browser.WaitMS(500)
 
         result = snhwalker_utils.snh_browser.GetJavascriptString(f'{varname}Result;')
         count = 0
-        while result == "" or count < 5:
-            snhwalker_utils.snh_browser.WaitMS(1500)
+        while result == "" and count < 5:
+            debugPrint(count)
+            snhwalker_utils.snh_browser.WaitMS(500)
             result = snhwalker_utils.snh_browser.GetJavascriptString(f'{varname}Result;')
             count += 1
 
         snhwalker_utils.snh_browser.ExecuteJavascript(f"let {varname}Result = '';")
 
         debugWrite("Tiktok_(" + str(time.time()) + ")_GetRequest.data", result)
+        
         return result
