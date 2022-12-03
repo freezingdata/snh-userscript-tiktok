@@ -13,9 +13,10 @@
 from tiktok.tiktok_tools import getRegex, checkJson
 from tiktok.tiktok_debug import *
 from tiktok.tiktok_urls import *
-from tiktok.tiktok_posting_html_creator import TiktokHTMLFactory
-from tiktok.tiktok_timeline_comment_collector_api import TiktokCommentCollectorApi
+#from tiktok.tiktok_timeline_comment_collector_api import TiktokCommentCollectorApi
 from tiktok.tiktok_config import modul_config
+from tiktok.tiktok_one_post_collector import TiktokOnePostCollector, TiktokPostConverter
+from tiktok.tiktok_captcha_resolver import TiktokCaptchaResolver
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
 import json
@@ -59,14 +60,31 @@ class TiktokTimelineCollector:
 
 
     def __enhanced_capturing(self):
+
+
         css_selector_post= 'div[class*=DivPlayerContainer]'
         css_selector_viewer = 'div[class*=DivBrowserModeContainer]'
         count_visible_posting = snhwalker_utils.snh_browser.GetJavascriptInteger(f'document.querySelectorAll("{css_selector_post}").length')   
         debugPrint(f'[Timeline] {count_visible_posting} posts found in DOM')
 
-        snhwalker.InitProgress(count_visible_posting)
+        #Count postings to collect
+        collect_count = 0
+        for posting_item in self.posting_list:
+            DTRangeStatus = snhwalker_utils.snh_model_manager.PostingDTStatus(posting_item, self.config)
+            if DTRangeStatus == 0:    
+                collect_count += 1    
+
+        snhwalker.InitProgress(collect_count)
+        for idx, posting_item in enumerate(self.posting_list):
+            DTRangeStatus = snhwalker_utils.snh_model_manager.PostingDTStatus(posting_item, self.config)
+            if DTRangeStatus == 0:
+                debugPrint(f'[Timeline] Open posts {idx+1}/{count_visible_posting}')  
+                snhwalker.StepProgress()    
+                TiktokOnePostCollector(posting_item["PostingURL"], self.config).save_post()
+
 
         # Iterates through all visible postings and click on each of it
+        """
         for idx in range(count_visible_posting):
             if idx < len(self.posting_list):
                 snhwalker.StepProgress()                
@@ -82,6 +100,7 @@ class TiktokTimelineCollector:
                 if len(self.captured_api_queries) > 0:
                     if self.config['SaveComments'] == True:
                         TiktokCommentCollectorApi(self.target_profile, self.posting_list[idx], self.captured_api_queries[0]).run()
+        """
 
     def __get_current_pagejson(self):
         return snhwalker_utils.snh_browser.GetJavascriptString("JSON.stringify(window['SIGI_STATE'])")
@@ -120,7 +139,21 @@ class TiktokTimelineCollector:
         snhwalker.DropStatusMessage('Scroll down complete timeline')
         debugPrint('[Timeline] Capture: https://www.tiktok.com/api/')
         snhwalker_utils.snh_browser.StartResourceCapture('api','')
+
+
         snhwalker_utils.snh_browser.ScrollPage()        
+        ScrollTime = time.time()    
+        ScrollPointY = snhwalker_utils.snh_browser.GetJavascriptInteger('window.scrollY ')
+        while ((time.time() - ScrollTime) < 2):
+            TiktokCaptchaResolver(4)
+            snhwalker_utils.snh_browser.ExecuteJavascript('window.scrollBy(0, 10000) ')
+            snhwalker_utils.snh_browser.WaitMS(1500)
+            ScrollPoint1Y = snhwalker_utils.snh_browser.GetJavascriptInteger('window.scrollY ')
+            if (ScrollPoint1Y > ScrollPointY):
+                ScrollTime = time.time()
+                ScrollPointY = ScrollPoint1Y   
+
+
         api_querys = snhwalker_utils.snh_browser.CloseResourceCapture()  
         debugPrint(f'[Timeline] {len(api_querys)} API querys captured')  
         debugPrint('[Timeline] Begin extracting postings')
@@ -135,7 +168,7 @@ class TiktokTimelineCollector:
     def ticktock_postingitem_handler(self, tt_postingitem):
         self.posting_count += 1
         debugPrint(f'[Timeline] Extracting post {self.posting_count}')
-        snh_posting = self.ConvertToSNPostingdata(tt_postingitem)
+        snh_posting = TiktokPostConverter().convert(tt_postingitem, self.target_profile)
         
         if modul_config["simple_timeline_collection"] is True:
             self.send_to_snh(snh_posting)
@@ -152,26 +185,6 @@ class TiktokTimelineCollector:
             snhwalker.DropStatusMessage('Create screenshot: ' + datetime.datetime.utcfromtimestamp(int(snh_posting["Timestamp"])).isoformat())
             postingExists = snhwalker.PromoteSNPostingdata(snh_posting)                    
         
-
-    def ConvertToSNPostingdata(self, TikTokItem):
-        # create empty SNPostingdata Dict
-
-        resultItem = snhwalker.CreateDictSNPostingdata()
-        resultItem['PostingID_Network'] = TikTokItem['id']
-        resultItem['Text'] = TikTokItem['desc']
-        resultItem['Timestamp'] = TikTokItem['createTime']
-        resultItem['Userdata'] = self.target_profile
-        resultItem['CommentCount'] = TikTokItem['stats']['commentCount']
-        resultItem['ReactionCount'] = TikTokItem['stats']['diggCount']
-        resultItem['PostingURL'] = 'https://www.tiktok.com/@'+resultItem['Userdata']['UserID']+'/'+'video/'+resultItem['PostingID_Network']
-        resultItem['VideoURL'] = TikTokItem['video']['playAddr']
-        resultItem['PostingID'] = snhwalker.GetUniquePostingID(resultItem)
-
-        if modul_config["simple_timeline_collection"]  is True:
-            resultItem['Sourcecode'] = TiktokHTMLFactory().create_simple_posting(resultItem, TikTokItem)
-            resultItem['Stylesheet'] = TiktokHTMLFactory().get_css_simple_posting()
-        
-        return resultItem
 
     @classmethod
     def capture_api_queries(cls, url: str) -> list:

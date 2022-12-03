@@ -53,6 +53,10 @@ class TiktokCommentCollectorScraping:
             self.__comments_2lv_nOverlay()  
 
     def __comments_2lv_nOverlay(self):    
+        if modul_config["load_comment_answers"] == False:
+            debugPrint(f'[Timeline Comments] No answeres will be collected - see module config')  
+            return
+
         debugPrint(f'[Timeline Comments] Loading answers')
         snhwalker_utils.snh_browser.WaitMS(3000)
         dom_comment_item_list = f'document.querySelectorAll("{self.css_selector["comment_item"]}")'
@@ -67,17 +71,39 @@ class TiktokCommentCollectorScraping:
                 if answers_to_load == False:
                     continue
                 snhwalker_utils.snh_browser.StartResourceCapture("api/comment/list/reply", "")  
+                resource_capture_anwers = []
+                old_cursor = -1
                 while answers_to_load:
+                    count_captures = len(resource_capture_anwers)
                     TiktokCaptchaResolver(4)
                     answer_request_count += 1
-                    debugPrint(f'[Timeline Comments] Prepare to laod answers from comment - {idx},{answer_request_count} / max {len(self.snh_comments)} ')                  
+                    debugPrint(f'[Timeline Comments] Prepare to load  answers from comment - {idx},{answer_request_count} / max {len(self.snh_comments)} ')                  
                     snhwalker_utils.snh_browser.ExecuteJavascript(f'{dom_comment_item_list}[{idx}].{dom_reply_loader}[0].scrollIntoView();]')   
                     snhwalker_utils.snh_browser.ExecuteJavascript(f'{dom_comment_item_list}[{idx}].{dom_reply_loader}[0].click();')   
                     #debugPrint(f'{dom_comment_item_list}[{idx}].{dom_reply_loader}.length')
                     snhwalker_utils.snh_browser.WaitMS(1000)
                     answers_to_load = snhwalker_utils.snh_browser.GetJavascriptInteger(f'{dom_comment_item_list}[{idx}].{dom_reply_loader}.length') > 0
-                
-                resource_capture_anwers: list = snhwalker_utils.snh_browser.CloseResourceCapture()   
+                    
+                    
+                    # This part is necessary, because the tikok webseit iften failes in delivering comment data  
+                    temp_answeres = snhwalker_utils.snh_browser.FlushResourceCapture()    
+                    if checkJson(temp_answeres[0]["response_body"]):  
+                        response_body = json.loads(temp_answeres[0]["response_body"])
+                        if  response_body.get("cursor", 0) <= old_cursor:
+                            break
+                        old_cursor = response_body.get("cursor", 0) 
+                    resource_capture_anwers += temp_answeres 
+
+                    #debugWrite("Tiktok_(" + str(time.time()) + ")_comments_answers.data", json.dumps(resource_capture_anwers))
+                    if count_captures >=  len(resource_capture_anwers):
+                        answers_to_load = False   
+                    
+                    if modul_config["limit_comment_answers"]:
+                        if count_captures >=  modul_config["limit_comment_answers_count"]:
+                            debugPrint(f'[Timeline Comments] Limit collected answeres')                  
+                            answers_to_load = False                           
+
+                resource_capture_anwers += snhwalker_utils.snh_browser.CloseResourceCapture()   
                 debugWrite("Tiktok_(" + str(time.time()) + ")_comments_answers.data", json.dumps(resource_capture_anwers))
                 self.__decode_answers(resource_capture_anwers, snh_comment_1lv_item)                   
     
@@ -135,8 +161,9 @@ class TiktokCommentCollectorScraping:
         for capture_item in rescource_capture:        
             if checkJson(capture_item["response_body"]):     
                 commentlist_json: dict = json.loads(capture_item["response_body"])
-                for comment in commentlist_json.get("comments", []):
-                    api_converter_comment = TiktokAPIConverter(comment)
-                    snh_comment = api_converter_comment.asSNHCommentdata(False, self.target_posting["PostingID"], snh_root_comment['CommentID'] )                        
-                    snhwalker.PromoteSNCommentdata(snh_comment)  
+                if not commentlist_json.get("comments", []) == None:
+                    for comment in commentlist_json["comments"]:
+                        api_converter_comment = TiktokAPIConverter(comment)
+                        snh_comment = api_converter_comment.asSNHCommentdata(False, self.target_posting["PostingID"], snh_root_comment['CommentID'] )                        
+                        snhwalker.PromoteSNCommentdata(snh_comment)  
         debugWrite("Tiktok_(" + str(time.time()) + ")_comments_1lv.json", json.dumps(self.comments_1lv))         

@@ -9,6 +9,7 @@ from tiktok.tiktok_urls import *
 from tiktok.tiktok_config import modul_config
 from tiktok.tiktok_profile_collector import TiktokProfileCollector
 from tiktok.tiktok_timeline_collector import TiktokTimelineCollector
+from tiktok.tiktok_task_manager import upgrade_task_item
 from tiktok.tiktok_captcha_resolver import TiktokCaptchaResolver, TiktokCaptchaDetector
 
 def getPluginInfo():
@@ -52,6 +53,12 @@ def snh_Save(taskItem):
     initDebug(taskItem)
     debugPrint(getPluginInfo())
     debugPrint('[START] snh_Save ' + taskItem["TargetType"])
+
+    if taskItem["TargetType"] is not "Post":
+        if (taskItem.get("Targetprofile") is None) and (not taskItem.get("TargetType") == "Profile"):
+             debugPrint("Start to upgrade task_item", taskItem)
+             upgrade_task_item(taskItem)
+
     if taskItem["TargetType"] == "Profile":
         TiktokProfileCollector().save_profile(taskItem["TargetURL"])
     elif taskItem["TargetType"] == "Timeline":

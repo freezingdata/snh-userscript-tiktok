@@ -19,11 +19,34 @@ from tiktok.tiktok_debug import *
 import re
 
 from tiktok.tiktok_api import TikTokAPI
-from tiktok.tiktok_timeline_comment_collector_api import TiktokCommentCollectorApi
+#from tiktok.tiktok_timeline_comment_collector_api import TiktokCommentCollectorApi
 from tiktok.tiktok_timeline_comment_collector_scraping import TiktokCommentCollectorScraping
-from tiktok_timeline_collector import TiktokTimelineCollector
 from tiktok.tiktok_captcha_resolver import TiktokCaptchaResolver
+from tiktok.tiktok_posting_html_creator import TiktokHTMLFactory
+from tiktok.tiktok_config import modul_config
 
+
+class TiktokPostConverter:
+    def __init__(self):
+        pass
+
+    def convert(self, TikTokItem, target_profile):
+        resultItem = snhwalker_utils.snhwalker.CreateDictSNPostingdata()
+        resultItem['PostingID_Network'] = TikTokItem['id']
+        resultItem['Text'] = TikTokItem['desc']
+        resultItem['Timestamp'] = TikTokItem['createTime']
+        resultItem['Userdata'] = target_profile
+        resultItem['CommentCount'] = TikTokItem['stats']['commentCount']
+        resultItem['ReactionCount'] = TikTokItem['stats']['diggCount']
+        resultItem['PostingURL'] = 'https://www.tiktok.com/@'+resultItem['Userdata']['UserID']+'/'+'video/'+resultItem['PostingID_Network']
+        resultItem['VideoURL'] = TikTokItem['video']['playAddr']
+        resultItem['PostingID'] = snhwalker_utils.snhwalker.GetUniquePostingID(resultItem)
+
+        if modul_config["simple_timeline_collection"]  is True:
+            resultItem['Sourcecode'] = TiktokHTMLFactory().create_simple_posting(resultItem, TikTokItem)
+            resultItem['Stylesheet'] = TiktokHTMLFactory().get_css_simple_posting()
+        
+        return resultItem
 
 class TiktokOnePostCollector:
     def __init__(self, url=None, config=None):
@@ -120,7 +143,7 @@ class TiktokOnePostCollector:
     def prepare_snh_post(source: dict, snh_profile) -> dict:
         debugPrint(f'[Timeline] Prepare snh post')
         css_selector_viewer = 'div[class*=DivContentContainer]'
-        snh_posting = TiktokTimelineCollector(snh_profile, None).ConvertToSNPostingdata(source)
+        snh_posting = TiktokPostConverter().convert(source, snh_profile)
         snh_posting['Sourcecode'] = snhwalker_utils.snh_browser.GetJavascriptString(f'document.querySelector("div[class*=DivPlayerContainer]").outerHTML') + \
                                     snhwalker_utils.snh_browser.GetJavascriptString(f'document.querySelector("div[class*=DivAuthorContainer]").outerHTML') +\
                                     snhwalker_utils.snh_browser.GetJavascriptString(f'document.querySelector("div[class*=PCommentTitle]").outerHTML')

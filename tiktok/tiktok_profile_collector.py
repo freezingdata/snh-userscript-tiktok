@@ -12,6 +12,7 @@
 
 from tiktok.tiktok_tools import getRegex, checkJson
 from tiktok.tiktok_debug import *
+from tiktok.tiktok_captcha_resolver import TiktokCaptchaResolver
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
 import json
@@ -59,6 +60,8 @@ class TiktokProfileCollector:
         # loads a tiktok profile and submits the snh user ojects to snh
         snhwalker.StartResourceCapture('https://www.tiktok.com/api/user/detail','');
         snhwalker.LoadPage(profile_url)
+        snhwalker_utils.snh_browser.WaitMS(2000)  
+        TiktokCaptchaResolver(4)
         snhwalker.StopResourceCapture()
         captured_data = snhwalker_utils.snh_browser.GetCapturedResource()
         debugPrint(f'Profile Json: {captured_data}')
@@ -79,4 +82,5 @@ class TiktokProfileCollector:
             userdata['UserProfilePictureURL'] = jsonObjectUser["avatarLarger"]
             userdata['ProfileType'] = 0
             snhwalker.PromoteSNUserdata(userdata)
+            return userdata
 
