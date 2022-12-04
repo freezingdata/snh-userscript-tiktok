@@ -86,12 +86,16 @@ class TiktokCommentCollectorScraping:
                     
                     
                     # This part is necessary, because the tikok webseit iften failes in delivering comment data  
-                    temp_answeres = snhwalker_utils.snh_browser.FlushResourceCapture()    
-                    if checkJson(temp_answeres[0]["response_body"]):  
-                        response_body = json.loads(temp_answeres[0]["response_body"])
+                    temp_answeres = snhwalker_utils.snh_browser.FlushResourceCapture()   
+                    if len(temp_answeres) == 0:
+                        break
+
+                    if checkJson(temp_answeres[0].get("response_body", "{}")):  
+                        response_body = json.loads(temp_answeres[0].get("response_body", "{}"))
                         if  response_body.get("cursor", 0) <= old_cursor:
                             break
                         old_cursor = response_body.get("cursor", 0) 
+
                     resource_capture_anwers += temp_answeres 
 
                     #debugWrite("Tiktok_(" + str(time.time()) + ")_comments_answers.data", json.dumps(resource_capture_anwers))
@@ -121,10 +125,12 @@ class TiktokCommentCollectorScraping:
 
         ScrollTime = time.time()
         item_count = 0      
+        item_count_old = 0
         dom_comment_item_list = f'document.querySelectorAll("{self.css_selector["comment_item"]}")'
         ScrollPointY = snhwalker_utils.snh_browser.GetJavascriptInteger('window.scrollY ')
         while ((time.time() - ScrollTime) < 2) and (item_count < modul_config["limit_root_comment_count"]):
             TiktokCaptchaResolver(4)
+            item_count_old = item_count
             item_count = snhwalker_utils.snh_browser.GetJavascriptInteger(dom_comment_item_list + '.length')
             debugPrint(f'[Timeline Comments] Collection of root comments - {item_count} / max {modul_config["limit_root_comment_count"] } ')  
             snhwalker_utils.snh_browser.ExecuteJavascript('window.scrollBy(0, 10000) ')
@@ -133,7 +139,10 @@ class TiktokCommentCollectorScraping:
             
             if (ScrollPoint1Y > ScrollPointY):
                 ScrollTime = time.time()
-                ScrollPointY = ScrollPoint1Y            
+                ScrollPointY = ScrollPoint1Y       
+
+            if item_count_old == item_count:
+                break
         debugPrint(f'[Timeline Comments] Collection of root comments finished: {item_count} ')  
         resource_capture_1lvcomments: list = snhwalker_utils.snh_browser.CloseResourceCapture()   
         debugWrite("Tiktok_(" + str(time.time()) + ")_comments_1lv.data", json.dumps(resource_capture_1lvcomments))

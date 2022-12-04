@@ -95,9 +95,9 @@ class TiktokOnePostCollector:
     def get_page_source(current_url: str) -> dict:
         #snhwalker_utils.snh_browser.LoadPage(current_url)
         api_req = TikTokAPI().do_simple_get_request(current_url)
-        re_data: list = re.findall(r'({"AppContext.+?})\<\/script\>', api_req, re.DOTALL)
-        debugWrite("Tiktok_(" + str(time.time()) + ")_redata.data", re_data[0])
+        re_data: list = re.findall(r'({"AppContext.+?})\<\/script\>', api_req, re.DOTALL)        
         try:
+            debugWrite("Tiktok_(" + str(time.time()) + ")_redata.data", re_data[0])
             page_source: dict = json.loads(re_data[0])
         except IndexError as e:
             page_source = {}
