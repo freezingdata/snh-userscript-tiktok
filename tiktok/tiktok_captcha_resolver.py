@@ -1,10 +1,10 @@
 # Python program to read an write an image
-import sys; sys.path.insert(0, r"C:\Users\umpan\AppData\Roaming\Python\Python39\site-packages")
+#import sys; sys.path.insert(0, r"C:\Users\umpan\AppData\Roaming\Python\Python39\site-packages")
 import math
-from PIL import Image
+from tiktok.PIL import Image
 import requests
 from io import BytesIO
-
+import sys
 
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
@@ -18,7 +18,7 @@ class TiktokCaptchaDetector:
 
 class TiktokCaptchaResolver:
     def __init__(self, max_attemps):
-        self.max_attemps = max_attemps
+        self.max_attemps = 10
         self.run()
 
 

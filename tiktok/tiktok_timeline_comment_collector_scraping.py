@@ -52,6 +52,12 @@ class TiktokCommentCollectorScraping:
             self.__handle_1lv_comments()   
             self.__comments_2lv_nOverlay()  
 
+    def __handle_comment_as_friendship(self, comment: dict) -> None:                
+        SNHFriendItem = snhwalker_utils.snh_model_manager.CreateDictSNFriendshipdata()
+        SNHFriendItem['User'] = comment['User']
+        SNHFriendItem['FriendshipType'] = 'FTComment' 
+        snhwalker.PromoteSNFriendshipdata(SNHFriendItem)  
+
     def __comments_2lv_nOverlay(self):    
         if modul_config["load_comment_answers"] == False:
             debugPrint(f'[Timeline Comments] No answeres will be collected - see module config')  
@@ -165,6 +171,7 @@ class TiktokCommentCollectorScraping:
             snhwalker.DropStatusMessage(f'[Timeline Comments] Converting comments ({self.counter}|{self.target_posting["PostingID"]})')
             if self.counter <= modul_config["limit_root_comment_count"]:
                 snhwalker.PromoteSNCommentdata(snh_comment)  
+                self.__handle_comment_as_friendship(snh_comment)
 
     def __decode_answers(self, rescource_capture, snh_root_comment):
         for capture_item in rescource_capture:        
@@ -175,4 +182,5 @@ class TiktokCommentCollectorScraping:
                         api_converter_comment = TiktokAPIConverter(comment)
                         snh_comment = api_converter_comment.asSNHCommentdata(False, self.target_posting["PostingID"], snh_root_comment['CommentID'] )                        
                         snhwalker.PromoteSNCommentdata(snh_comment)  
+                        self.__handle_comment_as_friendship(snh_comment)
         debugWrite("Tiktok_(" + str(time.time()) + ")_comments_1lv.json", json.dumps(self.comments_1lv))         
