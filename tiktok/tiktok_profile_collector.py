@@ -46,6 +46,8 @@ class TiktokProfileCollector:
         userdata = snhwalker.CreateDictSNUserData()
         tempTitle = snhwalker_utils.snh_browser.GetJavascriptString("document.querySelector('meta[name=\"keywords\"]').content;")
         userdata['UserName'] = getRegex(tempTitle, '(.*?),',1)
+        if userdata['UserName'] == '':
+            userdata['UserName'] = snhwalker_utils.snh_browser.GetJavascriptString("document.querySelector('h1[data-e2e=\"user-subtitle\"]').innerText")
         userdata['UserURL'] = snhwalker_utils.snh_browser.GetJavascriptString("document.querySelector('link[rel=\"canonical\"]').href;")
         userdata['UserID'] = getRegex(userdata['UserURL'], '@(.*)',1)
 
@@ -54,6 +56,7 @@ class TiktokProfileCollector:
 
         userdata['UserProfilePictureURL'] = snhwalker_utils.snh_browser.GetJavascriptString("document.querySelector('[data-e2e=user-avatar] img').src")
         userdata['ProfileType'] = 0
+        debugPrint(userdata)
         snhwalker.PromoteSNUserdata(userdata)
 
     def save_profile(self, profile_url):

@@ -118,10 +118,11 @@ def manual_enable_debug_log():
 
 def HandlePage() -> None:
     manual_enable_debug_log()
+    snhwalker_utils.snh_browser.WaitMS(1000)
     current_page = TiktokUrlSolver()
     if not current_page.page_type:
         return
-
+    debugPrint(current_page.page_type)
     call_dict = {
         "User": HandleProfile,
         "Post": HandlePost,
