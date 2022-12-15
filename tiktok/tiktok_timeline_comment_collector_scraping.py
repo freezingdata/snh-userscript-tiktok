@@ -18,6 +18,7 @@ from tiktok.tiktok_config import modul_config
 from tiktok.tiktok_captcha_resolver import TiktokCaptchaResolver
 import json
 import time
+import sys
 
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
@@ -48,9 +49,15 @@ class TiktokCommentCollectorScraping:
 
     def run(self):
         if self.html_type == 'non_overlay':  
-            self.__comments_1lv_nOverlay()   
-            self.__handle_1lv_comments()   
-            self.__comments_2lv_nOverlay()  
+            try:
+                self.__comments_1lv_nOverlay()   
+                self.__handle_1lv_comments()   
+                self.__comments_2lv_nOverlay()  
+            except Exception as e:
+                debugPrint("'[API] ERROR in getting comments")
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                debugPrint(e, exc_type, exc_tb.tb_lineno)   
+
 
     def __handle_comment_as_friendship(self, comment: dict) -> None:                
         SNHFriendItem = snhwalker_utils.snh_model_manager.CreateDictSNFriendshipdata()

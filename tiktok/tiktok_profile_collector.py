@@ -61,7 +61,7 @@ class TiktokProfileCollector:
 
     def save_profile(self, profile_url):
         # loads a tiktok profile and submits the snh user ojects to snh
-        snhwalker_utils.snh_browser.StartResourceCapture('https://www.tiktok.com/api/user/detail','');
+        snhwalker_utils.snh_browser.StartResourceCapture('https://www.tiktok.com/api/user/detail','')
         snhwalker_utils.snh_browser.LoadPage(profile_url)
         snhwalker_utils.snh_browser.WaitMS(2000)  
         TiktokCaptchaResolver(4)
