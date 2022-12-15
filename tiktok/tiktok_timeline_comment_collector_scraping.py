@@ -56,7 +56,7 @@ class TiktokCommentCollectorScraping:
         SNHFriendItem = snhwalker_utils.snh_model_manager.CreateDictSNFriendshipdata()
         SNHFriendItem['User'] = comment['User']
         SNHFriendItem['FriendshipType'] = 'FTComment' 
-        snhwalker.PromoteSNFriendshipdata(SNHFriendItem)  
+        snhwalker_utils.snhwalker.PromoteSNFriendshipdata(SNHFriendItem)  
 
     def __comments_2lv_nOverlay(self):    
         if modul_config["load_comment_answers"] == False:
@@ -168,9 +168,9 @@ class TiktokCommentCollectorScraping:
             api_converter_comment = TiktokAPIConverter(comment_1lv_item)
             snh_comment = api_converter_comment.asSNHCommentdata(False, self.target_posting["PostingID"], 0)     
             self.snh_comments.append(snh_comment)      
-            snhwalker.DropStatusMessage(f'[Timeline Comments] Converting comments ({self.counter}|{self.target_posting["PostingID"]})')
+            snhwalker_utils.snhwalker.DropStatusMessage(f'[Timeline Comments] Converting comments ({self.counter}|{self.target_posting["PostingID"]})')
             if self.counter <= modul_config["limit_root_comment_count"]:
-                snhwalker.PromoteSNCommentdata(snh_comment)  
+                snhwalker_utils.snhwalker.PromoteSNCommentdata(snh_comment)  
                 self.__handle_comment_as_friendship(snh_comment)
 
     def __decode_answers(self, rescource_capture, snh_root_comment):
@@ -181,6 +181,6 @@ class TiktokCommentCollectorScraping:
                     for comment in commentlist_json["comments"]:
                         api_converter_comment = TiktokAPIConverter(comment)
                         snh_comment = api_converter_comment.asSNHCommentdata(False, self.target_posting["PostingID"], snh_root_comment['CommentID'] )                        
-                        snhwalker.PromoteSNCommentdata(snh_comment)  
+                        snhwalker_utils.snhwalker.PromoteSNCommentdata(snh_comment)  
                         self.__handle_comment_as_friendship(snh_comment)
         debugWrite("Tiktok_(" + str(time.time()) + ")_comments_1lv.json", json.dumps(self.comments_1lv))         

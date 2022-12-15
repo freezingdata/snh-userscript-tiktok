@@ -31,7 +31,7 @@ class TiktokPostConverter:
         pass
 
     def convert(self, TikTokItem, target_profile):
-        resultItem = snhwalker_utils.snhwalker.CreateDictSNPostingdata()
+        resultItem = snhwalker_utils.snh_model_manager.CreateDictSNPostingdata()
         resultItem['PostingID_Network'] = TikTokItem['id']
         resultItem['Text'] = TikTokItem['desc']
         resultItem['Timestamp'] = TikTokItem['createTime']

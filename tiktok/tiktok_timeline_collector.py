@@ -74,12 +74,12 @@ class TiktokTimelineCollector:
             if DTRangeStatus == 0:    
                 collect_count += 1    
 
-        snhwalker.InitProgress(collect_count)
+        snhwalker_utils.snhwalker.InitProgress(collect_count)
         for idx, posting_item in enumerate(self.posting_list):
             DTRangeStatus = snhwalker_utils.snh_model_manager.PostingDTStatus(posting_item, self.config)
             if DTRangeStatus == 0:
                 debugPrint(f'[Timeline] Open posts {idx+1}/{count_visible_posting}')  
-                snhwalker.StepProgress()    
+                snhwalker_utils.snhwalker.StepProgress()    
                 TiktokOnePostCollector(posting_item["PostingURL"], self.config).save_post()
 
 
@@ -87,7 +87,7 @@ class TiktokTimelineCollector:
         """
         for idx in range(count_visible_posting):
             if idx < len(self.posting_list):
-                snhwalker.StepProgress()                
+                snhwalker_utils.snhwalker.StepProgress()                
                 debugPrint(f'[Timeline] Open posts {idx+1}/{count_visible_posting}')  
 
                 snhwalker_utils.snh_browser.ExecuteJavascript(f'document.querySelectorAll("{css_selector_post}")[{idx}].click();')   
@@ -136,7 +136,7 @@ class TiktokTimelineCollector:
 
     def __capture_postings(self):
         debugPrint('[Timeline] Scroll down complete timeline')
-        snhwalker.DropStatusMessage('Scroll down complete timeline')
+        snhwalker_utils.snhwalker.DropStatusMessage('Scroll down complete timeline')
         debugPrint('[Timeline] Capture: https://www.tiktok.com/api/')
         snhwalker_utils.snh_browser.StartResourceCapture('api','')
 
@@ -180,9 +180,9 @@ class TiktokTimelineCollector:
         DTRangeStatus = snhwalker_utils.snh_model_manager.PostingDTStatus(snh_posting, self.config)
         if DTRangeStatus == 0:
             debugPrint(f'[Timeline]  - Post: create posting data {datetime.datetime.utcfromtimestamp(int(snh_posting["Timestamp"])).isoformat()}') 
-            snhwalker.DropStatusMessage('Download images and videos in post: ' + datetime.datetime.utcfromtimestamp(int(snh_posting["Timestamp"])).isoformat())
-            snhwalker.DownloadPostingFiles(snh_posting, 'https://www.tiktok.com')
-            snhwalker.DropStatusMessage('Create screenshot: ' + datetime.datetime.utcfromtimestamp(int(snh_posting["Timestamp"])).isoformat())
+            snhwalker_utils.snhwalker.DropStatusMessage('Download images and videos in post: ' + datetime.datetime.utcfromtimestamp(int(snh_posting["Timestamp"])).isoformat())
+            snhwalker_utils.snhwalker.DownloadPostingFiles(snh_posting, 'https://www.tiktok.com')
+            snhwalker_utils.snhwalker.DropStatusMessage('Create screenshot: ' + datetime.datetime.utcfromtimestamp(int(snh_posting["Timestamp"])).isoformat())
             postingExists = snhwalker.PromoteSNPostingdata(snh_posting)                    
         
 
