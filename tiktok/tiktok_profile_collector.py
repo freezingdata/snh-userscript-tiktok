@@ -57,7 +57,7 @@ class TiktokProfileCollector:
         userdata['UserProfilePictureURL'] = snhwalker_utils.snh_browser.GetJavascriptString("document.querySelector('[data-e2e=user-avatar] img').src")
         userdata['ProfileType'] = 0
         debugPrint(userdata)
-        snhwalker_utils.snh_browser.PromoteSNUserdata(userdata)
+        snhwalker_utils.snhwalker.PromoteSNUserdata(userdata)
 
     def save_profile(self, profile_url):
         # loads a tiktok profile and submits the snh user ojects to snh
