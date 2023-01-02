@@ -72,7 +72,6 @@ class TikTokAPI:
         request_url = f'https://www.tiktok.com/api/comment/list/reply/?{urlencode(self.universal_query)}&{urlencode(query)}' 
         return self.__get_request(request_url)        
 
-
     def __get_request(self, requesturl):
         debugPrint(f'[API] Request: {requesturl}')
         headers = CaseInsensitiveDict()
@@ -89,7 +88,7 @@ class TikTokAPI:
         headers["User-Agent"] = self.useragent
         try:
             resp = requests.get(requesturl, headers=headers)   
-            debugWrite('TikTok_API_response_'+str(time.time())+'.data', resp.text )        
+            debugWrite('TikTok_API_response_'+str(time.time())+'.data', resp.text)
             return resp.text     
         except Exception as e:
             debugPrint("'[API] ERROR in get_request")
