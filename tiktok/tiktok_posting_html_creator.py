@@ -51,10 +51,12 @@ class TiktokHTMLFactory:
         '''   
 
     def create_simple_posting(self, snh_posting, tt_posting):
-        return f'''
+        src = f'''
             <div class="container">
             <div class="image"><img border="0" src="{tt_posting["video"]["originCover"]}" ></div>
             <div class="content">{snh_posting["Text"]}</div>
             </div>
         
         '''
+        return src
+        

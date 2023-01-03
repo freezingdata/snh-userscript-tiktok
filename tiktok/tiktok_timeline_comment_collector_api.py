@@ -69,7 +69,7 @@ class TiktokCommentCollectorApi:
         SNHFriendItem = snhwalker_utils.snh_model_manager.CreateDictSNFriendshipdata()
         SNHFriendItem['User'] = comment['User']
         SNHFriendItem['FriendshipType'] = 'FTComment' 
-        snhwalker.PromoteSNFriendshipdata(SNHFriendItem)  
+        snhwalker_utils.snhwalker.PromoteSNFriendshipdata(SNHFriendItem)  
 
 
     def __converting_comment_api_responses(self, api_response) -> None:
@@ -88,8 +88,8 @@ class TiktokCommentCollectorApi:
                 continue
 
             self.counter  += 1        
-            snhwalker.DropStatusMessage(f'Converting comments ({self.counter}|{self.target_posting["PostingID"]})')
-            snhwalker.PromoteSNCommentdata(snh_comment)   
+            snhwalker_utils.snhwalker.DropStatusMessage(f'Converting comments ({self.counter}|{self.target_posting["PostingID"]})')
+            snhwalker_utils.snhwalker.PromoteSNCommentdata(snh_comment)   
             self.__handle_comment_as_friendship(snh_comment) 
 
             debugPrint(f'Converting comments ({self.counter}|{self.target_posting["PostingID"]})')  
@@ -135,9 +135,9 @@ class TiktokCommentCollectorApi:
             if snh_comment_answer is None:
                 continue
 
-            snhwalker.DropStatusMessage(f'Converting comments ({self.counter }|{self.target_posting["PostingID"]})')
+            snhwalker_utils.snhwalker.DropStatusMessage(f'Converting comments ({self.counter }|{self.target_posting["PostingID"]})')
             
-            snhwalker.PromoteSNCommentdata(snh_comment_answer)    
+            snhwalker_utils.snhwalker.PromoteSNCommentdata(snh_comment_answer)    
             self.__handle_comment_as_friendship(snh_comment_answer)  
 
 

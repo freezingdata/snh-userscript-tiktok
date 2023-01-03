@@ -98,7 +98,7 @@ class TikTokAPI:
 
     @staticmethod
     def do_simple_get_request(request_url):
-        debugPrint("[API TikTok] - get request.")
+        debugPrint(f"[API TikTok] - Request {request_url}")
 
         varname = f"xhr{str(uuid.uuid4().hex)[1:5]}"
         snhwalker_utils.snh_browser.ExecuteJavascript(f"delete {varname}Result;")
@@ -111,18 +111,20 @@ class TikTokAPI:
                      {varname}.onload = function () {{{varname}Result = this.responseText}};
                      {varname}.send("");"""
 
-        debugPrint(js)
+        #debugPrint(js)
         snhwalker_utils.snh_browser.ExecuteJavascript(js)
-        snhwalker_utils.snh_browser.WaitMS(1500)
+        snhwalker_utils.snh_browser.WaitMS(500)
 
         result = snhwalker_utils.snh_browser.GetJavascriptString(f'{varname}Result;')
         count = 0
-        while result == "" or count < 5:
-            snhwalker_utils.snh_browser.WaitMS(1500)
+        while result == "" and count < 5:
+            debugPrint(f"[API TikTok] - Request Wait-Timer {count+1}/5(max)")
+            snhwalker_utils.snh_browser.WaitMS(500)
             result = snhwalker_utils.snh_browser.GetJavascriptString(f'{varname}Result;')
             count += 1
 
         snhwalker_utils.snh_browser.ExecuteJavascript(f"let {varname}Result = '';")
 
         debugWrite("Tiktok_(" + str(time.time()) + ")_GetRequest.data", result)
+        
         return result

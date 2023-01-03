@@ -53,11 +53,11 @@ class TiktokAPIConverter:
 
         def asSNHUserdata(self):
             if self.isUser():
-                userdata = snhwalker.CreateDictSNUserData()        
-                userdata['UserName'] = self.dataobject["nickname"]
+                userdata = snhwalker_utils.snh_model_manager.CreateDictSNUserData()        
+                userdata['UserName'] = self.dataobject.get("nickname", "No Nickname")
                 
-                userdata['UserID'] = self.dataobject["unique_id"]
-                userdata['UserIDNumber'] = self.dataobject["uid"]
+                userdata['UserID'] = self.dataobject.get("unique_id", "")
+                userdata['UserIDNumber'] = self.dataobject.get("uid", "")
 
                 if "avatar_thumb" in self.dataobject:
                     if "url_list" in self.dataobject["avatar_thumb"]:
@@ -76,7 +76,7 @@ class TiktokAPIConverter:
                 
                 tempComment['User'] = TiktokAPIConverter(self.dataobject["user"]).asSNHUserdata()
                 if tempComment['User'] is None:
-                    tempComment['User'] = snhwalker.CreateDictSNUserData()  
+                    tempComment['User'] = snhwalker_utils.snh_model_manager.CreateDictSNUserData()  
 
 
                 tempComment['Timestamp'] = self.dataobject["create_time"]
