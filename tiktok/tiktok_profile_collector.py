@@ -72,10 +72,19 @@ class TiktokProfileCollector:
         debugPrint(f'[INFO] Start save profile {profile_url}')
         snhwalker.StartResourceCapture('https://www.tiktok.com/api/user/detail', '')
         snhwalker.LoadPage(profile_url)
-        snhwalker_utils.snh_browser.WaitMS(2000)
-        TiktokCaptchaResolver(4)
+
+        break_counter = 0
+        while True:
+            snhwalker_utils.snh_browser.WaitMS(3000)
+            TiktokCaptchaResolver(4)
+            captured_data = snhwalker_utils.snh_browser.GetCapturedResource()
+            if captured_data:
+                break
+            if break_counter > 5:
+                debugPrint(f'[ERROR] Captured data is empty.')
+                return
+
         snhwalker.StopResourceCapture()
-        captured_data = snhwalker_utils.snh_browser.GetCapturedResource()
         debugPrint(f'Profile Json: {captured_data}')
         if checkJson(captured_data):
             jsonObject = json.loads(captured_data)

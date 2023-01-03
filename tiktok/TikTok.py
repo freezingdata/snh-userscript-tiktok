@@ -54,7 +54,7 @@ def snh_Save(taskItem):
     debugPrint(getPluginInfo())
     debugPrint('[START] snh_Save ' + taskItem["TargetType"])
 
-    if taskItem["TargetType"] is not "Post":
+    if taskItem["TargetType"] != "Post":
         if (taskItem.get("Targetprofile") is None) and (not taskItem.get("TargetType") == "Profile"):
              debugPrint("Start to upgrade task_item", taskItem)
              upgrade_task_item(taskItem)
