@@ -9,18 +9,20 @@ import sys
 from snhwalker_utils import snhwalker, snh_major_version, snh_account_manager
 import snhwalker_utils
 
+
 class TiktokCaptchaDetector:
     def __init__(self):
         pass
 
-    def captcha_visible(self):
+    @staticmethod
+    def captcha_visible():
         return snhwalker_utils.snh_browser.GetJavascriptInteger('document.querySelectorAll(".captcha_verify_container").length') > 0 
+
 
 class TiktokCaptchaResolver:
     def __init__(self, max_attemps):
         self.max_attemps = 10
         self.run()
-
 
     def sort_helper(self, elem):
         return elem[1]
@@ -95,6 +97,7 @@ class TiktokCaptchaResolver:
 
     def run(self):
         if TiktokCaptchaDetector().captcha_visible() is False:
+            print("[TikTok] Captcha Resolver not found")
             return
         print("[TikTok] Captcha Resolver")
         attempt_count = 0
